@@ -10,7 +10,7 @@ const MAX_SPEED: f32 = 80.0;
 #[derive(NativeClass)]
 #[inherit(KinematicBody2D)]
 pub struct Player {
-    velocity: Vector2
+    velocity: Vector2,
 }
 
 // Player implementation.
@@ -19,7 +19,7 @@ impl Player {
     // The "constructor" of the class.
     fn new(_owner: &KinematicBody2D) -> Self {
         Player {
-            velocity: Vector2::zero()
+            velocity: Vector2::zero(),
         }
     }
 
@@ -46,17 +46,30 @@ impl Player {
         };
 
         if input_vector != Vector2::zero() {
-            if input_vector.x > 0.0 {
-                self.animate(_owner, "RunRight");
-            } else {
-                self.animate(_owner, "RunLeft");
-            }
+            get_typed_node::<AnimationTree, _>("./AnimationTree", _owner, |animation_tree| {
+                animation_tree.set("parameters/Idle/blend_position", input_vector);
+                animation_tree.set("parameters/Run/blend_position", input_vector);
+
+                let animation_state = animation_tree.get("parameters/playback");
+                let animation_state = animation_state
+                    .try_to_object::<AnimationNodeStateMachinePlayback>()
+                    .expect("Should cast to AnimationNodeStateMachinePlayback");
+                let animation_state = unsafe { animation_state.assume_safe() };
+                animation_state.travel("Run");
+            });
 
             self.velocity = self
                 .velocity
                 .move_towards(input_vector * MAX_SPEED, ACCELERATION * delta as f32);
         } else {
-            self.animate(_owner, "IdleRight");
+            get_typed_node::<AnimationTree, _>("./AnimationTree", _owner, |animation_tree| {
+                let animation_state = animation_tree.get("parameters/playback");
+                let animation_state = animation_state
+                    .try_to_object::<AnimationNodeStateMachinePlayback>()
+                    .expect("Should cast to AnimationNodeStateMachinePlayback");
+                let animation_state = unsafe { animation_state.assume_safe() };
+                animation_state.travel("Idle");
+            });
 
             self.velocity = self
                 .velocity
