@@ -2,9 +2,9 @@
 use gdnative::api::*;
 use gdnative::prelude::*;
 
-const ACCELERATION: f32 = 50.0;
-const FRICTION: f32 = 10.0;
-const MAX_SPEED: f32 = 100.0;
+const ACCELERATION: f32 = 500.0;
+const FRICTION: f32 = 500.0;
+const MAX_SPEED: f32 = 80.0;
 
 // Player "class".
 #[derive(NativeClass)]
@@ -46,12 +46,18 @@ impl Player {
         };
 
         if input_vector != Vector2::zero() {
-            self.velocity = input_vector * ACCELERATION * delta as f32;
-            self.velocity = self.velocity.clamped(MAX_SPEED * delta as f32);
+            self.velocity = self.velocity.move_towards(input_vector * MAX_SPEED, ACCELERATION * delta as f32);
         } else {
             self.velocity = self.velocity.move_towards(Vector2::zero(), FRICTION * delta as f32);
         }
 
-        _owner.move_and_collide(self.velocity, false, false, false);
+        self.velocity = _owner.move_and_slide(
+            self.velocity, 
+            Vector2::zero(),
+            false,
+            4,
+            std::f64::consts::FRAC_PI_4,
+            true,
+        );
     }
 }
