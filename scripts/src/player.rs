@@ -1,4 +1,4 @@
-// use crate::utils::*;
+use crate::utils::*;
 use gdnative::api::*;
 use gdnative::prelude::*;
 
@@ -10,7 +10,7 @@ const MAX_SPEED: f32 = 80.0;
 #[derive(NativeClass)]
 #[inherit(KinematicBody2D)]
 pub struct Player {
-    velocity: Vector2,
+    velocity: Vector2
 }
 
 // Player implementation.
@@ -19,7 +19,7 @@ impl Player {
     // The "constructor" of the class.
     fn new(_owner: &KinematicBody2D) -> Self {
         Player {
-            velocity: Vector2::zero(),
+            velocity: Vector2::zero()
         }
     }
 
@@ -46,13 +46,25 @@ impl Player {
         };
 
         if input_vector != Vector2::zero() {
-            self.velocity = self.velocity.move_towards(input_vector * MAX_SPEED, ACCELERATION * delta as f32);
+            get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
+                player.play("RunRight", -1.0, 1.0, false);
+            });
+
+            self.velocity = self
+                .velocity
+                .move_towards(input_vector * MAX_SPEED, ACCELERATION * delta as f32);
         } else {
-            self.velocity = self.velocity.move_towards(Vector2::zero(), FRICTION * delta as f32);
+            get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
+                player.play("IdleRight", -1.0, 1.0, false);
+            });
+
+            self.velocity = self
+                .velocity
+                .move_towards(Vector2::zero(), FRICTION * delta as f32);
         }
 
         self.velocity = _owner.move_and_slide(
-            self.velocity, 
+            self.velocity,
             Vector2::zero(),
             false,
             4,
