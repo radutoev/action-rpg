@@ -46,17 +46,17 @@ impl Player {
         };
 
         if input_vector != Vector2::zero() {
-            get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
-                player.play("RunRight", -1.0, 1.0, false);
-            });
+            if input_vector.x > 0.0 {
+                self.animate(_owner, "RunRight");
+            } else {
+                self.animate(_owner, "RunLeft");
+            }
 
             self.velocity = self
                 .velocity
                 .move_towards(input_vector * MAX_SPEED, ACCELERATION * delta as f32);
         } else {
-            get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
-                player.play("IdleRight", -1.0, 1.0, false);
-            });
+            self.animate(_owner, "IdleRight");
 
             self.velocity = self
                 .velocity
@@ -71,5 +71,11 @@ impl Player {
             std::f64::consts::FRAC_PI_4,
             true,
         );
+    }
+
+    fn animate(&mut self, _owner: &KinematicBody2D, animation_name: &str) {
+        get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
+            player.play(animation_name, -1.0, 1.0, false);
+        });
     }
 }
