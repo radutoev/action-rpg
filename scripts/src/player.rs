@@ -85,10 +85,4 @@ impl Player {
             true,
         );
     }
-
-    fn animate(&mut self, _owner: &KinematicBody2D, animation_name: &str) {
-        get_typed_node::<AnimationPlayer, _>("./AnimationPlayer", _owner, |player| {
-            player.play(animation_name, -1.0, 1.0, false);
-        });
-    }
 }
