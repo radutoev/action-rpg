@@ -25,7 +25,9 @@ impl Player {
 
     #[export]
     fn _ready(&self, _owner: &KinematicBody2D) {
-        godot_print!("Hello, player");
+        get_typed_node::<AnimationTree, _>("./AnimationTree", _owner, |animation_tree| {
+            animation_tree.set_active(true);
+        });
     }
 
     //Called every tick that the physics updates.
